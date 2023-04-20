@@ -36,7 +36,7 @@ def create_task():
     task_data = request.get_json()
 
     if not validate_task_data(task_data):
-        abort(401)
+        abort(400)
 
     task = {
         'id': task_id_counter,
