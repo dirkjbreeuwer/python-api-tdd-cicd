@@ -6,13 +6,20 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.resolve()))
 
-from app import app
+from app import app, tasks
 
 @pytest.fixture
 def client() -> FlaskClient:
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
+
+@pytest.fixture(autouse=True)
+def setup_tasks():
+    tasks.clear()
+    tasks.append({"id": 1, "title": "Sample task", "description": "This is a sample task"})
+    yield
+    tasks.clear()
 
 def test_get_tasks(client):
     response = client.get('/tasks')
@@ -44,7 +51,8 @@ def test_update_task(client):
     task_id = 1
     updated_task = {
         'title': 'Updated test task',
-        'completed': True
+        'completed': True,
+        'due_date': '2023-05-01T00:00:00Z'  # Add this line
     }
     response = client.put(f'/tasks/{task_id}', json=updated_task)
     assert response.status_code == 200
